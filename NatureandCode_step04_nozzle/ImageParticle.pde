@@ -1,4 +1,4 @@
-// creates centered unit particle
+// Creates centered unit particle
 // applying texture map to polygon
 
 class ImageParticle {

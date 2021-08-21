@@ -16,12 +16,12 @@
 // Step 04 - Control particle emission rate
 
 
-float gravity = .03; // global environmental variable
+static float gravity = .03f; // global environmental variable
 Emitter e;
 
 void setup() {
   size(1024, 768, P2D);
-  e = new Emitter(10000, loadImage("arrow.png"), new PVector(2, 12), new PVector(width/2, height/8), new PVector(.5, 2), 4);
+  e = new Emitter(this, 10000, loadImage("arrow.png"), new PVector(2, 12), new PVector(width/2, height/8), new PVector(.5, 2), 4);
 }
 
 void draw() {
