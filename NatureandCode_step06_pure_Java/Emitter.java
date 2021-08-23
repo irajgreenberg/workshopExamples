@@ -18,7 +18,7 @@ class Emitter {
   PVector[] dim;
   PVector[] pos;
   PVector[] spd;
-  ImageParticle p;
+  ArrowParticle ap;
   float partEmissionCount = 0.0f; // cast to float
 
   Emitter() {
@@ -42,7 +42,7 @@ class Emitter {
       pos[i] = new PVector(this.emitterPos.x, this.emitterPos.y);
       spd[i] = new PVector(pApp.random(-this.emitterForce.x, this.emitterForce.x), pApp.random(-this.emitterForce.y));
     }
-    p = new ImageParticle(this.pApp);
+    ap = new ArrowParticle(this.pApp);
   }
 
   void run() {
@@ -52,7 +52,7 @@ class Emitter {
       pApp.translate(pos[i].x, pos[i].y);
       pApp.scale(dim[i].x, dim[i].y);
       pApp.rotate(PApplet.atan2((float)(pos[i].y-this.emitterPos.y), (float)(pos[i].x-this.emitterPos.x)));
-      p.create();
+      ap.create();
       pApp.popMatrix();
       spd[i].y += EmitterJavaApp.gravity; // gravity is static so requires class name
       pos[i].add(spd[i]);

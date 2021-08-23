@@ -1,18 +1,19 @@
-// Creates centered unit particle
-// applying texture map to polygon
+// Creates centered drawn 
+// unit arrow particle
+
 
 // Requires import of Processing core classes
 // when .java suffix is added
 import processing.core.*;
 
-class ImageParticle {
+class ArrowParticle {
 
   PApplet pApp;
 
-  ImageParticle() {
+  ArrowParticle() {
   }
 
-  ImageParticle(PApplet pApp) {
+  ArrowParticle(PApplet pApp) {
     this.pApp = pApp;
   }
 

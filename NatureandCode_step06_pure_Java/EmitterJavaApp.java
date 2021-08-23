@@ -16,7 +16,6 @@
 
 // Step 06 - Pure Java, outside the Processing mothership
 
-
 import processing.core.*;
 
 public class EmitterJavaApp extends PApplet {
@@ -39,7 +38,7 @@ public class EmitterJavaApp extends PApplet {
     }
 
     static public void main(String[] passedArgs) {
-        String[] appletArgs = new String[]{"EmitterJavaApp"};
+        String[] appletArgs = new String[] { "EmitterJavaApp" };
         if (passedArgs != null) {
             PApplet.main(concat(appletArgs, passedArgs));
         } else {
