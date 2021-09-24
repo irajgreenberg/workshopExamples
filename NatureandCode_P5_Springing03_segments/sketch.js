@@ -25,7 +25,7 @@ function setup() {
 
     let segmentReducer = 4.9 / segmentCount; // create wormlike body
     for (let i = 0; i < segmentCount; i++) {
-        followers[i] = new Bot(5 - segmentReducer * i, color(15, 170, 255, 50), createVector(0, 0),
+        followers[i] = new Bot(5 - segmentReducer * i, color(random(10, 255), 170, 255, 50), createVector(0, 0),
             createVector(0, 0));
     }
 
