@@ -16,7 +16,7 @@ function setup() {
     bounds = createVector(400, 400);
     node1 = new VerletNode(new p5.Vector(0, 0,), 6);
     node2 = new VerletNode(new p5.Vector(100, 0,), 6);
-    stick = new VerletStick(node1, node2, .0005, 0, '#4466ff');
+    stick = new VerletStick(node1, node2, .05, 0, '#6644ff');
     stick.nudge(1, new p5.Vector(random(-12, 12), random(-12, 12)));
 }
 

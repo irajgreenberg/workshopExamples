@@ -11,13 +11,12 @@ class VerletStick {
     }
 
     constrainLen() {
-        let accuracyCount = 1; // costs a bit in performance
-        // To Do: create a parameter in constructor for accuracyCount
-        
+        let accuracyCount = 1;
         for (let i = 0; i < accuracyCount; i++) {
             let delta = new p5.Vector(
                 this.end.pos.x - this.start.pos.x,
-                this.end.pos.y - this.start.pos.y
+                this.end.pos.y - this.start.pos.y,
+                this.end.pos.z - this.start.pos.z
             );
             let deltaLength = delta.mag();
             let node1ConstrainFactor = 0;
@@ -48,8 +47,10 @@ class VerletStick {
             let difference = (deltaLength - this.len) / deltaLength;
             this.start.pos.x += delta.x * (node1ConstrainFactor * this.stickTension * difference);
             this.start.pos.y += delta.y * (node1ConstrainFactor * this.stickTension * difference);
+            this.start.pos.z += delta.z * (node1ConstrainFactor * this.stickTension * difference);
             this.end.pos.x -= delta.x * (node2ConstrainFactor * this.stickTension * difference);
             this.end.pos.y -= delta.y * (node2ConstrainFactor * this.stickTension * difference);
+            this.end.pos.z -= delta.z * (node2ConstrainFactor * this.stickTension * difference);
         }
     }
 
@@ -59,26 +60,19 @@ class VerletStick {
         } else {
             this.end.nudge(offset);
         }
-
-    }
-
-    verlet() {
-        this.start.verlet();
-        this.end.verlet();
-        this.constrainLen();
     }
 
     draw() {
-        fill(this.color);
-        noStroke();
-        this.start.draw();
-        this.end.draw();
+        // draw nodes
+        // this.start.draw();
+        // this.end.draw();
 
+        //draw stick
         stroke(this.color);
         noFill();
         beginShape();
-        vertex(this.start.pos.x, this.start.pos.y);
-        vertex(this.end.pos.x, this.end.pos.y);
+        vertex(this.start.pos.x, this.start.pos.y, this.start.pos.z);
+        vertex(this.end.pos.x, this.end.pos.y, this.end.pos.z);
         endShape();
     }
 

@@ -11,9 +11,7 @@ class VerletStick {
     }
 
     constrainLen() {
-        let accuracyCount = 1; // costs a bit in performance
-        // To Do: create a parameter in constructor for accuracyCount
-        
+        let accuracyCount = 5;
         for (let i = 0; i < accuracyCount; i++) {
             let delta = new p5.Vector(
                 this.end.pos.x - this.start.pos.x,
@@ -69,11 +67,11 @@ class VerletStick {
     }
 
     draw() {
-        fill(this.color);
-        noStroke();
+        // draw nodes
         this.start.draw();
         this.end.draw();
 
+        //draw stick
         stroke(this.color);
         noFill();
         beginShape();
