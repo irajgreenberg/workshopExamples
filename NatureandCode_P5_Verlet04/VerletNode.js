@@ -34,6 +34,11 @@ class VerletNode {
 		sphere(this.radius * 2)
 		pop();
 	}
+	
+	setStyle(radius, color){
+		this.color = color;
+		this.radius = radius;
+	}
 
 	boundsCollide(bounds) {
 		if (this.pos.x > bounds.x / 2 - this.radius) {

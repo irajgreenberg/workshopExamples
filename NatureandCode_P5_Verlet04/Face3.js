@@ -26,9 +26,9 @@ class Face3 {
     }
 
     draw() {
-        //noStroke();
-        stroke(0);
-        fill(100, 100, 145, 100);
+        noStroke();
+       // stroke(0);
+        fill(this.col);
         beginShape();
         vertex(this.vec1.x, this.vec1.y, this.vec1.z);
         vertex(this.vec2.x, this.vec2.y, this.vec2.z);

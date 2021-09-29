@@ -11,7 +11,7 @@ class VerletStick {
     }
 
     constrainLen() {
-        let accuracyCount = 1;
+        let accuracyCount = 50;
         for (let i = 0; i < accuracyCount; i++) {
             let delta = new p5.Vector(
                 this.end.pos.x - this.start.pos.x,
@@ -63,10 +63,6 @@ class VerletStick {
     }
 
     draw() {
-        // draw nodes
-        // this.start.draw();
-        // this.end.draw();
-
         //draw stick
         stroke(this.color);
         noFill();
@@ -82,7 +78,7 @@ class VerletStick {
     }
 
     setColor(color) {
-        // to do
+        this.color = color;
     }
 
     setOpacity(alpha) {
