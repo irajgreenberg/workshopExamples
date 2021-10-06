@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>p5.js example</title>
+  <style>
+    body {
+      padding: 0;
+      margin: 0;
+    }
+  </style>
+  
+  <!-- Include P5 lib -->
+  <script src="../libP5/p5.js"></script>
+ 
+  <!-- Hack avoids continuous browser caching with inconsistent .js updates.
+  From:https://stackoverflow.com/questions/11467873/how-to-append-timestamp-to-the-javascript-file-in-script-tag-url-to-avoid-cach -->
+  <script type="text/javascript">
+    (function () {
+      /**
+       * Increment and return the local storage version for a given JavaScript file by name
+       * @param  {string} scriptName  Name of JavaScript file to be versioned (including .js file extension)
+       * @return {integer}            New incremented version number of file to pass to .js GET parameter
+       */
+      var incrementScriptVer = function (scriptName) {
+
+        var version = parseInt(localStorage.getItem(scriptName));
+
+        // Simple validation that our item is an integer
+        if (version > 0) {
+          version += 1;
+        } else {
+          // Default to 1
+          version = 1;
+        }
+
+        localStorage.setItem(scriptName, version);
+        return version;
+      };
+
+      // INCLUDE YOUR .JS FILES HERE
+      var scripts = ['VerletNode.js', 'VerletStick.js', 'Face3.js', 'VerletBox.js', 'sketch.js'];
+
+      // Loop through each script name and append our new version number
+      scripts.map(function (script) {
+        var currentScriptVer = incrementScriptVer(script);
+        document.write("<script language='text/javascript' type='text/javascript' src='./" + script + "?version=" + currentScriptVer + " '><\/script>");
+      });
+    })();
+  </script>
+
+</head>
+
+<body>
+  <main>
+  </main>
+</body>
+
+</html>
