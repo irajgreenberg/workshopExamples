@@ -19,11 +19,11 @@ function setup() {
     // verletBox.nudge(1, createVector(10.01, 25.02, 30.03));
     // verletBox.setStyles(3, color(200, 20, 20), color(20, 20, 200));
 
-    verletToroid = new VerletToroid(80, 30, 12, 12);
+    verletToroid = new VerletToroid(80, 40, 12, 12);
 }
 
 function draw() {
-    background(0);
+    background(200);
 
     ambientLight(255);
     directionalLight(255, 0, 0, 0.25, 0.25, 0);

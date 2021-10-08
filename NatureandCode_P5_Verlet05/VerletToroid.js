@@ -6,10 +6,13 @@ class VerletToroid {
         this.slices = slices; // number
         this.connects = connects; // number
 
+        // 2D array
         this.nodes = []; // verlet nodes
+
         this.sticks = []; // verlet sticks
         //col; // Color
 
+        // create nodes
         let theta = 0;
         // calculate nodes
         for (let i = 0; i < this.connects; i++) {
@@ -31,8 +34,8 @@ class VerletToroid {
             for (let j = 0; j < this.slices; j++) {
                 // create copies of tube profiles (based on # of slices)
                 /* Y-rotation to sweep connects, creating slices
-                z' = z*cos q - x*sin q
-                x' = z*sin q + x*cos q
+                z' = z*cos p - x*sin p
+                x' = z*sin p + x*cos p
                 y' = y
                 */
                 let z2 = z * Math.cos(phi) - x * Math.sin(phi);
@@ -47,6 +50,11 @@ class VerletToroid {
 
             theta += Math.PI * 2 / this.connects;
         }
+
+        stroke(255);
+        // create sticks
+
+
     }
 
     verlet() {
@@ -57,7 +65,18 @@ class VerletToroid {
         for (let i = 0; i < this.connects; i++) {
             for (let j = 0; j < this.slices; j++) {
                 this.nodes[i][j].draw();
+
+                fill(200, 100, 100, 150);
+                if (i < this.connects - 1 && j < this.slices - 1) {
+                    beginShape();
+                    vertex(this.nodes[i][j].pos.x, this.nodes[i][j].pos.y, this.nodes[i][j].pos.z);
+                    vertex(this.nodes[i][j + 1].pos.x, this.nodes[i][j + 1].pos.y, this.nodes[i][j + 1].pos.z);
+                    vertex(this.nodes[i + 1][j + 1].pos.x, this.nodes[i + 1][j + 1].pos.y, this.nodes[i + 1][j + 1].pos.z);
+                    vertex(this.nodes[i + 1][j].pos.x, this.nodes[i + 1][j].pos.y, this.nodes[i + 1][j].pos.z);
+                    endShape(CLOSE);
+                }
             }
+
         }
     }
 
