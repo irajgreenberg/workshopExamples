@@ -41,7 +41,7 @@ class VerletToroid {
                 let z2 = z * Math.cos(phi) - x * Math.sin(phi);
                 let x2 = z * Math.sin(phi) + x * Math.cos(phi)
 
-                connectNodes[j] = new VerletNode(createVector(x2, y, z2), .88, color(255, 255, 255))
+                connectNodes[j] = new VerletNode(createVector(x2, y, z2), .5, color(255, 255, 255))
 
                 phi += Math.PI * 2 / this.slices;
             }
@@ -50,10 +50,6 @@ class VerletToroid {
 
             theta += Math.PI * 2 / this.connects;
         }
-
-        stroke(255);
-        // create sticks
-
 
     }
 
@@ -67,6 +63,7 @@ class VerletToroid {
                 this.nodes[i][j].draw();
 
                 fill(200, 100, 100, 150);
+                stroke(155, 75, 55, 5);
                 if (i < this.connects - 1 && j < this.slices - 1) {
                     beginShape();
                     vertex(this.nodes[i][j].pos.x, this.nodes[i][j].pos.y, this.nodes[i][j].pos.z);
