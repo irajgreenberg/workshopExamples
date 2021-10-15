@@ -5,9 +5,9 @@
 
 // Description:
 // Creating a Verlet organism
-// based on a Verlet Cube
+// based on a Verlet Toroid
 
-let bounds; // vector-+++++++++++
+let bounds; // vector
 let verletBox;
 
 let verletToroid;
@@ -15,11 +15,8 @@ let verletToroid;
 function setup() {
     createCanvas(600, 600, WEBGL);
     bounds = createVector(300, 300, 300);
-    // verletBox = new VerletBox(createVector(0, 0, 0), 80, .001, color(100, 155, 25));
-    // verletBox.nudge(1, createVector(10.01, 25.02, 30.03));
-    // verletBox.setStyles(3, color(200, 20, 20), color(20, 20, 200));
-
-    verletToroid = new VerletToroid(80, 40, 12, 12);
+    verletToroid = new VerletToroid(100, 40, 12, 12, .3, 0, color(200, 125, 255));
+    verletToroid.nudge(-1, createVector(22.3, 22.5, 22.987));
 }
 
 function draw() {
@@ -33,12 +30,11 @@ function draw() {
     rotateY(frameCount * PI / 720);
     drawBounds();
 
-    // specularMaterial(250);
-    // verletBox.verlet();
-    // verletBox.draw();
-    // verletBox.boundsCollide(bounds);
+    specularMaterial(250);
 
-    verletToroid.draw();
+    verletToroid.verlet();
+    verletToroid.draw(true, true, true);
+    verletToroid.boundsCollide(bounds);
 }
 
 // NOTE: Needs to be a cube 

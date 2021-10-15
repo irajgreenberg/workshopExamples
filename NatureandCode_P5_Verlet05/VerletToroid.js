@@ -1,21 +1,24 @@
 class VerletToroid {
 
-    constructor(r1, r2, slices, connects) {
+    constructor(r1, r2, slices, connects, springiness, col) {
         this.r1 = r1; // number
         this.r2 = r2; // number
         this.slices = slices; // number
         this.connects = connects; // number
+        this.springiness = springiness; // number
+        this.col = col;
 
         // 2D array
         this.nodes = []; // verlet nodes
+        this.nodes1D = []; // 1d array for convenience
 
         this.sticks = []; // verlet sticks
-        //col; // Color
+        this.crossSupportSticks = [];
 
         // create nodes
         let theta = 0;
         // calculate nodes
-        for (let i = 0; i < this.connects; i++) {
+        for (let i = 0, k = 0; i < this.connects; i++) {
             // create tube profile (based on # of connects)
 
             /* Z-rotation to calculate connects
@@ -39,9 +42,9 @@ class VerletToroid {
                 y' = y
                 */
                 let z2 = z * Math.cos(phi) - x * Math.sin(phi);
-                let x2 = z * Math.sin(phi) + x * Math.cos(phi)
+                let x2 = z * Math.sin(phi) + x * Math.cos(phi);
 
-                connectNodes[j] = new VerletNode(createVector(x2, y, z2), .5, color(255, 255, 255))
+                this.nodes1D[k++] = connectNodes[j] = new VerletNode(createVector(x2, y, z2), 1.2, this.col);
 
                 phi += Math.PI * 2 / this.slices;
             }
@@ -51,33 +54,121 @@ class VerletToroid {
             theta += Math.PI * 2 / this.connects;
         }
 
+        // create sticks
+        for (let i = 0, k = 0; i < this.connects; i++) {
+            for (let j = 0; j < this.slices; j++) {
+                if (i < this.connects - 1 && j < this.slices - 1) {
+                    this.sticks[k++] = new VerletStick(this.nodes[i][j], this.nodes[i][j + 1], this.springiness, 0, this.col)
+                    this.sticks[k++] = new VerletStick(this.nodes[i][j + 1], this.nodes[i + 1][j + 1], this.springiness, 0, this.col)
+                    this.sticks[k++] = new VerletStick(this.nodes[i + 1][j + 1], this.nodes[i + 1][j], this.springiness, 0, this.col)
+                    this.sticks[k++] = new VerletStick(this.nodes[i + 1][j], this.nodes[i][j], this.springiness, 0, this.col)
+                } else if (i == this.connects - 1 && j < this.slices - 1) {
+                    this.sticks[k++] = new VerletStick(this.nodes[i][j], this.nodes[i][j + 1], this.springiness, 0, this.col);
+                    this.sticks[k++] = new VerletStick(this.nodes[i][j + 1], this.nodes[0][j + 1], this.springiness, 0, this.col);
+                    this.sticks[k++] = new VerletStick(this.nodes[0][j + 1], this.nodes[0][j], this.springiness, 0, this.col);
+                    this.sticks[k++] = new VerletStick(this.nodes[0][j], this.nodes[i][j], this.springiness, 0, this.col);
+                } else if (i < this.connects - 1 && j == this.slices - 1) {
+                    beginShape();
+                    this.sticks[k++] = new VerletStick(this.nodes[i][j], this.nodes[i][0], this.springiness, 0, this.col);
+                    this.sticks[k++] = new VerletStick(this.nodes[i][0], this.nodes[i + 1][0], this.springiness, 0, this.col);
+                    this.sticks[k++] = new VerletStick(this.nodes[i + 1][0], this.nodes[i + 1][j], this.springiness, 0, this.col);
+                    this.sticks[k++] = new VerletStick(this.nodes[i + 1][j], this.nodes[i][j], this.springiness, 0, this.col);
+                }
+            }
+        }
+
+        // create cross supports
+        let randNodeindex = 0;
+        let mod = 2;
+        for (let i = 0, k = 0; i < this.nodes1D.length; i++) {
+            let val = Math.floor(Math.random() * (this.nodes1D.length - 1));
+            if (i % mod === 0 && i !== val) {
+                this.crossSupportSticks[k++] = new VerletStick(this.nodes1D[i], this.nodes1D[val], 1, 0, this.col);
+            }
+        }
+    }
+
+    nudge(index, offset) {
+        if(index===-1){
+            let ind = Math.floor(Math.random()*(this.nodes1D.length-1));
+            this.nodes1D[ind].pos.add(offset);
+        } else {
+            this.nodes1D[index].pos.add(offset);
+        }
     }
 
     verlet() {
+        for (let i = 0; i < this.nodes1D.length; i++) {
+            this.nodes1D[i].verlet();
+        }
+
+        // constrain Toroid sticks
+        for (let i = 0; i < this.sticks.length; i++) {
+            this.sticks[i].constrainLen();
+        }
+
+        //constrain cross-supports 
+        for (let i = 0; i < this.crossSupportSticks.length; i++) {
+            this.crossSupportSticks[i].constrainLen();
+        }
     }
 
+    draw(areNodesDrawable = true, areSticksDrawable = true, isSkinDrawable = true) {
+        // draw nodes
+        if (areNodesDrawable) {
+            for (let i = 0; i < this.nodes1D.length; i++) {
+                this.nodes1D[i].draw();
+            }
+        }
 
-    draw() {
-        for (let i = 0; i < this.connects; i++) {
-            for (let j = 0; j < this.slices; j++) {
-                this.nodes[i][j].draw();
+        // draw verlet sticks
+        if (areSticksDrawable) {
+            for (let i = 0; i < this.sticks.length; i++) {
+                this.sticks[i].draw();
+            }
+        }
 
-                fill(200, 100, 100, 150);
-                stroke(155, 75, 55, 5);
-                if (i < this.connects - 1 && j < this.slices - 1) {
-                    beginShape();
-                    vertex(this.nodes[i][j].pos.x, this.nodes[i][j].pos.y, this.nodes[i][j].pos.z);
-                    vertex(this.nodes[i][j + 1].pos.x, this.nodes[i][j + 1].pos.y, this.nodes[i][j + 1].pos.z);
-                    vertex(this.nodes[i + 1][j + 1].pos.x, this.nodes[i + 1][j + 1].pos.y, this.nodes[i + 1][j + 1].pos.z);
-                    vertex(this.nodes[i + 1][j].pos.x, this.nodes[i + 1][j].pos.y, this.nodes[i + 1][j].pos.z);
-                    endShape(CLOSE);
+        // draw skin
+        if (isSkinDrawable) {
+            for (let i = 0; i < this.connects; i++) {
+                for (let j = 0; j < this.slices; j++) {
+                    fill(200, 100, 100, 150);
+                    noStroke();
+                    if (i < this.connects - 1 && j < this.slices - 1) {
+                        beginShape();
+                        vertex(this.nodes[i][j].pos.x, this.nodes[i][j].pos.y, this.nodes[i][j].pos.z);
+                        vertex(this.nodes[i][j + 1].pos.x, this.nodes[i][j + 1].pos.y, this.nodes[i][j + 1].pos.z);
+                        vertex(this.nodes[i + 1][j + 1].pos.x, this.nodes[i + 1][j + 1].pos.y, this.nodes[i + 1][j + 1].pos.z);
+                        vertex(this.nodes[i + 1][j].pos.x, this.nodes[i + 1][j].pos.y, this.nodes[i + 1][j].pos.z);
+                        endShape(CLOSE);
+                    } else if (i == this.connects - 1 && j < this.slices - 1) {
+                        beginShape();
+                        vertex(this.nodes[i][j].pos.x, this.nodes[i][j].pos.y, this.nodes[i][j].pos.z);
+                        vertex(this.nodes[i][j + 1].pos.x, this.nodes[i][j + 1].pos.y, this.nodes[i][j + 1].pos.z);
+                        vertex(this.nodes[0][j + 1].pos.x, this.nodes[0][j + 1].pos.y, this.nodes[0][j + 1].pos.z);
+                        vertex(this.nodes[0][j].pos.x, this.nodes[0][j].pos.y, this.nodes[0][j].pos.z);
+                        endShape(CLOSE);
+                    } else if (i < this.connects - 1 && j == this.slices - 1) {
+                        beginShape();
+                        vertex(this.nodes[i][j].pos.x, this.nodes[i][j].pos.y, this.nodes[i][j].pos.z);
+                        vertex(this.nodes[i][0].pos.x, this.nodes[i][0].pos.y, this.nodes[i][0].pos.z);
+                        vertex(this.nodes[i + 1][0].pos.x, this.nodes[i + 1][0].pos.y, this.nodes[i + 1][0].pos.z);
+                        vertex(this.nodes[i + 1][j].pos.x, this.nodes[i + 1][j].pos.y, this.nodes[i + 1][j].pos.z);
+                        endShape(CLOSE);
+                    }
                 }
             }
+        }
 
+        for (let i = 0; i < this.crossSupportSticks.length; i++) {
+            // this.crossSupportSticks[i].draw();
         }
     }
 
     boundsCollide(bounds) {
+        for (let i = 0; i < this.nodes1D.length; i++) {
+            this.nodes1D[i].boundsCollide(bounds);
+        }
     }
 
 }
