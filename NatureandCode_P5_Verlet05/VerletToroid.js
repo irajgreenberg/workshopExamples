@@ -1,16 +1,22 @@
 class VerletToroid {
 
-    constructor(r1, r2, slices, connects, springiness, col) {
+    constructor(r1, r2, slices, connects, springiness, rigidity) {
         this.r1 = r1; // number
         this.r2 = r2; // number
         this.slices = slices; // number
         this.connects = connects; // number
         this.springiness = springiness; // number
-        this.col = col;
+        rigidity = abs(5-rigidity)+1; // inverse
+        this.rigidity = constrain(rigidity, 1, 5); // number
+
+        this.nodeCol = color(175, 185, 90);
+        this.stickCol = color(145, 145, 145);
+        this.skinCol = color(165, 83, 5, 145);
 
         // 2D array
         this.nodes = []; // verlet nodes
         this.nodes1D = []; // 1d array for convenience
+        this.sliceNodes = []; //conveninence array for calculating slice cross-ssupports
 
         this.sticks = []; // verlet sticks
         this.crossSupportSticks = [];
@@ -44,7 +50,7 @@ class VerletToroid {
                 let z2 = z * Math.cos(phi) - x * Math.sin(phi);
                 let x2 = z * Math.sin(phi) + x * Math.cos(phi);
 
-                this.nodes1D[k++] = connectNodes[j] = new VerletNode(createVector(x2, y, z2), 1.2, this.col);
+                this.nodes1D[k++] = connectNodes[j] = new VerletNode(createVector(x2, y, z2), 1.2, this.nodeCol);
 
                 phi += Math.PI * 2 / this.slices;
             }
@@ -58,34 +64,46 @@ class VerletToroid {
         for (let i = 0, k = 0; i < this.connects; i++) {
             for (let j = 0; j < this.slices; j++) {
                 if (i < this.connects - 1 && j < this.slices - 1) {
-                    this.sticks[k++] = new VerletStick(this.nodes[i][j], this.nodes[i][j + 1], this.springiness, 0, this.col)
-                    this.sticks[k++] = new VerletStick(this.nodes[i][j + 1], this.nodes[i + 1][j + 1], this.springiness, 0, this.col)
-                    this.sticks[k++] = new VerletStick(this.nodes[i + 1][j + 1], this.nodes[i + 1][j], this.springiness, 0, this.col)
-                    this.sticks[k++] = new VerletStick(this.nodes[i + 1][j], this.nodes[i][j], this.springiness, 0, this.col)
+                    this.sticks[k++] = new VerletStick(this.nodes[i][j], this.nodes[i][j + 1], this.springiness, 0, this.stickCol)
+                    this.sticks[k++] = new VerletStick(this.nodes[i][j + 1], this.nodes[i + 1][j + 1], this.springiness, 0, this.stickCol)
+                    this.sticks[k++] = new VerletStick(this.nodes[i + 1][j + 1], this.nodes[i + 1][j], this.springiness, 0, this.stickCol)
+                    this.sticks[k++] = new VerletStick(this.nodes[i + 1][j], this.nodes[i][j], this.springiness, 0, this.stickCol)
                 } else if (i == this.connects - 1 && j < this.slices - 1) {
-                    this.sticks[k++] = new VerletStick(this.nodes[i][j], this.nodes[i][j + 1], this.springiness, 0, this.col);
-                    this.sticks[k++] = new VerletStick(this.nodes[i][j + 1], this.nodes[0][j + 1], this.springiness, 0, this.col);
-                    this.sticks[k++] = new VerletStick(this.nodes[0][j + 1], this.nodes[0][j], this.springiness, 0, this.col);
-                    this.sticks[k++] = new VerletStick(this.nodes[0][j], this.nodes[i][j], this.springiness, 0, this.col);
+                    this.sticks[k++] = new VerletStick(this.nodes[i][j], this.nodes[i][j + 1], this.springiness, 0, this.stickCol);
+                    this.sticks[k++] = new VerletStick(this.nodes[i][j + 1], this.nodes[0][j + 1], this.springiness, 0, this.stickCol);
+                    this.sticks[k++] = new VerletStick(this.nodes[0][j + 1], this.nodes[0][j], this.springiness, 0, this.stickCol);
+                    this.sticks[k++] = new VerletStick(this.nodes[0][j], this.nodes[i][j], this.springiness, 0, this.stickCol);
                 } else if (i < this.connects - 1 && j == this.slices - 1) {
                     beginShape();
-                    this.sticks[k++] = new VerletStick(this.nodes[i][j], this.nodes[i][0], this.springiness, 0, this.col);
-                    this.sticks[k++] = new VerletStick(this.nodes[i][0], this.nodes[i + 1][0], this.springiness, 0, this.col);
-                    this.sticks[k++] = new VerletStick(this.nodes[i + 1][0], this.nodes[i + 1][j], this.springiness, 0, this.col);
-                    this.sticks[k++] = new VerletStick(this.nodes[i + 1][j], this.nodes[i][j], this.springiness, 0, this.col);
+                    this.sticks[k++] = new VerletStick(this.nodes[i][j], this.nodes[i][0], this.springiness, 0, this.stickCol);
+                    this.sticks[k++] = new VerletStick(this.nodes[i][0], this.nodes[i + 1][0], this.springiness, 0, this.stickCol);
+                    this.sticks[k++] = new VerletStick(this.nodes[i + 1][0], this.nodes[i + 1][j], this.springiness, 0, this.stickCol);
+                    this.sticks[k++] = new VerletStick(this.nodes[i + 1][j], this.nodes[i][j], this.springiness, 0, this.stickCol);
                 }
             }
         }
 
-        // create cross supports
+        // create global cross supports
         let randNodeindex = 0;
-        let mod = 2;
         for (let i = 0, k = 0; i < this.nodes1D.length; i++) {
             let val = Math.floor(Math.random() * (this.nodes1D.length - 1));
-            if (i % mod === 0 && i !== val) {
-                this.crossSupportSticks[k++] = new VerletStick(this.nodes1D[i], this.nodes1D[val], 1, 0, this.col);
+            if (i % this.rigidity == 0 && i != val) {
+                this.crossSupportSticks[k++] = new VerletStick(this.nodes1D[i], this.nodes1D[val], 1, 0, this.stickCol);
             }
         }
+
+        // // create tube cross supports
+        // for (let i = 0, k = 0; i < this.connects/2; i++) {
+        //     for (let j = 0; j < 1; j++) {
+        //         this.crossSupportSticks[k++] = new VerletStick(this.nodes1D[i], this.nodes1D[(i+1)], 1, 0, this.stickCol);
+        //     }
+        // }
+
+
+    }
+
+    setColor(skinCol){
+        this.skinCol = skinCol;
     }
 
     nudge(index, offset) {
@@ -96,6 +114,7 @@ class VerletToroid {
             this.nodes1D[index].pos.add(offset);
         }
     }
+
 
     verlet() {
         for (let i = 0; i < this.nodes1D.length; i++) {
@@ -132,7 +151,7 @@ class VerletToroid {
         if (isSkinDrawable) {
             for (let i = 0; i < this.connects; i++) {
                 for (let j = 0; j < this.slices; j++) {
-                    fill(200, 100, 100, 150);
+                    fill(this.skinCol);
                     noStroke();
                     if (i < this.connects - 1 && j < this.slices - 1) {
                         beginShape();
@@ -161,7 +180,7 @@ class VerletToroid {
         }
 
         for (let i = 0; i < this.crossSupportSticks.length; i++) {
-            // this.crossSupportSticks[i].draw();
+           //  this.crossSupportSticks[i].draw();
         }
     }
 

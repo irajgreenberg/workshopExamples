@@ -15,7 +15,8 @@ let verletToroid;
 function setup() {
     createCanvas(600, 600, WEBGL);
     bounds = createVector(300, 300, 300);
-    verletToroid = new VerletToroid(100, 40, 12, 12, .3, 0, color(200, 125, 255));
+    verletToroid = new VerletToroid(100, 40, 12, 12, .3, 4);
+    //color(200, 125, 255)
     verletToroid.nudge(-1, createVector(22.3, 22.5, 22.987));
 }
 
