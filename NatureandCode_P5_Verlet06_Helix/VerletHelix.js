@@ -1,17 +1,19 @@
-class VerletToroid {
+class VerletHelix {
 
-    constructor(r1, r2, slices, connects, springiness, rigidity) {
+    constructor(r1, r2, slices, connects, springiness, rigidity = 5, ht = 100, rots = 5) {
         this.r1 = r1; // number
         this.r2 = r2; // number
         this.slices = slices; // number
         this.connects = connects; // number
         this.springiness = springiness; // number
-        rigidity = abs(5-rigidity)+1; // inverse
+        rigidity = abs(5 - rigidity) + 1; // inverse
         this.rigidity = constrain(rigidity, 1, 5); // number
+        this.ht = ht;
+        this.rots = rots;
 
-        this.nodeCol = color(175, 185, 90);
-        this.stickCol = color(145, 145, 145);
-        this.skinCol = color(165, 83, 5, 145);
+        this.nodeCol = color(255, 25, 25);
+        this.stickCol = color(65, 65, 175);
+        this.skinCol = color(175, 175, 175, 255);
 
         // 2D array
         this.nodes = []; // verlet nodes
@@ -21,8 +23,14 @@ class VerletToroid {
         this.sticks = []; // verlet sticks
         this.crossSupportSticks = [];
 
+        // controls downward incrementation of helix
+        this.helixStepper = this.ht / this.slices;
+
         // create nodes
         let theta = 0;
+
+        this.crossSupportsVisible = false;
+
         // calculate nodes
         for (let i = 0, k = 0; i < this.connects; i++) {
             // create tube profile (based on # of connects)
@@ -33,13 +41,15 @@ class VerletToroid {
             z' = z
             */
             let x = this.r1 + Math.cos(theta) * r2;
-            let y = Math.sin(theta) * r2;
+            let y = -this.ht / 2 + Math.sin(theta) * r2;
             let z = 0;
 
             // create new connects arrays
             let connectNodes = [];
 
             let phi = 0;
+
+            let y2 = y;
             for (let j = 0; j < this.slices; j++) {
                 // create copies of tube profiles (based on # of slices)
                 /* Y-rotation to sweep connects, creating slices
@@ -50,9 +60,9 @@ class VerletToroid {
                 let z2 = z * Math.cos(phi) - x * Math.sin(phi);
                 let x2 = z * Math.sin(phi) + x * Math.cos(phi);
 
-                this.nodes1D[k++] = connectNodes[j] = new VerletNode(createVector(x2, y, z2), 1.2, this.nodeCol);
+                this.nodes1D[k++] = connectNodes[j] = new VerletNode(createVector(x2, y2 += this.helixStepper, z2), .8, this.nodeCol);
 
-                phi += Math.PI * 2 / this.slices;
+                phi += Math.PI * 2 * this.rots / this.slices;
             }
             // add each connectNodes array to nodes 2D array
             this.nodes[i] = connectNodes;
@@ -74,11 +84,10 @@ class VerletToroid {
                     this.sticks[k++] = new VerletStick(this.nodes[0][j + 1], this.nodes[0][j], this.springiness, 0, this.stickCol);
                     this.sticks[k++] = new VerletStick(this.nodes[0][j], this.nodes[i][j], this.springiness, 0, this.stickCol);
                 } else if (i < this.connects - 1 && j == this.slices - 1) {
-                    beginShape();
-                    this.sticks[k++] = new VerletStick(this.nodes[i][j], this.nodes[i][0], this.springiness, 0, this.stickCol);
-                    this.sticks[k++] = new VerletStick(this.nodes[i][0], this.nodes[i + 1][0], this.springiness, 0, this.stickCol);
-                    this.sticks[k++] = new VerletStick(this.nodes[i + 1][0], this.nodes[i + 1][j], this.springiness, 0, this.stickCol);
-                    this.sticks[k++] = new VerletStick(this.nodes[i + 1][j], this.nodes[i][j], this.springiness, 0, this.stickCol);
+                    // this.sticks[k++] = new VerletStick(this.nodes[i][j], this.nodes[i][0], this.springiness, 0, this.stickCol);
+                    // this.sticks[k++] = new VerletStick(this.nodes[i][0], this.nodes[i + 1][0], this.springiness, 0, this.stickCol);
+                    // this.sticks[k++] = new VerletStick(this.nodes[i + 1][0], this.nodes[i + 1][j], this.springiness, 0, this.stickCol);
+                    // this.sticks[k++] = new VerletStick(this.nodes[i + 1][j], this.nodes[i][j], this.springiness, 0, this.stickCol);
                 }
             }
         }
@@ -92,23 +101,16 @@ class VerletToroid {
             }
         }
 
-        // // create tube cross supports
-        // for (let i = 0, k = 0; i < this.connects/2; i++) {
-        //     for (let j = 0; j < 1; j++) {
-        //         this.crossSupportSticks[k++] = new VerletStick(this.nodes1D[i], this.nodes1D[(i+1)], 1, 0, this.stickCol);
-        //     }
-        // }
-
 
     }
 
-    setColor(skinCol){
+    setColor(skinCol) {
         this.skinCol = skinCol;
     }
 
     nudge(index, offset) {
-        if(index===-1){
-            let ind = Math.floor(Math.random()*(this.nodes1D.length-1));
+        if (index === -1) {
+            let ind = Math.floor(Math.random() * (this.nodes1D.length - 1));
             this.nodes1D[ind].pos.add(offset);
         } else {
             this.nodes1D[index].pos.add(offset);
@@ -168,19 +170,21 @@ class VerletToroid {
                         vertex(this.nodes[0][j].pos.x, this.nodes[0][j].pos.y, this.nodes[0][j].pos.z);
                         endShape(CLOSE);
                     } else if (i < this.connects - 1 && j == this.slices - 1) {
-                        beginShape();
-                        vertex(this.nodes[i][j].pos.x, this.nodes[i][j].pos.y, this.nodes[i][j].pos.z);
-                        vertex(this.nodes[i][0].pos.x, this.nodes[i][0].pos.y, this.nodes[i][0].pos.z);
-                        vertex(this.nodes[i + 1][0].pos.x, this.nodes[i + 1][0].pos.y, this.nodes[i + 1][0].pos.z);
-                        vertex(this.nodes[i + 1][j].pos.x, this.nodes[i + 1][j].pos.y, this.nodes[i + 1][j].pos.z);
-                        endShape(CLOSE);
+                        // beginShape();
+                        // vertex(this.nodes[i][j].pos.x, this.nodes[i][j].pos.y, this.nodes[i][j].pos.z);
+                        // vertex(this.nodes[i][0].pos.x, this.nodes[i][0].pos.y, this.nodes[i][0].pos.z);
+                        // vertex(this.nodes[i + 1][0].pos.x, this.nodes[i + 1][0].pos.y, this.nodes[i + 1][0].pos.z);
+                        // vertex(this.nodes[i + 1][j].pos.x, this.nodes[i + 1][j].pos.y, this.nodes[i + 1][j].pos.z);
+                        // endShape(CLOSE);
                     }
                 }
             }
         }
 
-        for (let i = 0; i < this.crossSupportSticks.length; i++) {
-            // this.crossSupportSticks[i].draw();
+        if (this.crossSupportsVisible) {
+            for (let i = 0; i < this.crossSupportSticks.length; i++) {
+                 this.crossSupportSticks[i].draw();
+            }
         }
     }
 
@@ -188,6 +192,10 @@ class VerletToroid {
         for (let i = 0; i < this.nodes1D.length; i++) {
             this.nodes1D[i].boundsCollide(bounds);
         }
+    }
+
+    setAreCrossSupportsVisible(crossSupportsVisible){
+        this.crossSupportsVisible = crossSupportsVisible;
     }
 
 }

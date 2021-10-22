@@ -6,20 +6,23 @@ class VerletToroid {
         this.slices = slices; // number
         this.connects = connects; // number
         this.springiness = springiness; // number
-        rigidity = abs(5-rigidity)+1; // inverse
+        rigidity = abs(5 - rigidity) + 1; // inverse
         this.rigidity = constrain(rigidity, 1, 5); // number
 
         this.nodeCol = color(175, 185, 90);
         this.stickCol = color(145, 145, 145);
-        this.skinCol = color(165, 83, 5, 145);
+        this.skinCol = color(165, 83, 5, 255);
 
-        // 2D array
-        this.nodes = []; // verlet nodes
+        this.nodes = []; // 2d array verlet nodes
         this.nodes1D = []; // 1d array for convenience
         this.sliceNodes = []; //conveninence array for calculating slice cross-ssupports
 
         this.sticks = []; // verlet sticks
         this.crossSupportSticks = [];
+        this.hairs = [];
+        this.hairLen = 30;
+
+        this.ctr = 0;
 
         // create nodes
         let theta = 0;
@@ -50,7 +53,12 @@ class VerletToroid {
                 let z2 = z * Math.cos(phi) - x * Math.sin(phi);
                 let x2 = z * Math.sin(phi) + x * Math.cos(phi);
 
-                this.nodes1D[k++] = connectNodes[j] = new VerletNode(createVector(x2, y, z2), 1.2, this.nodeCol);
+                if (j % 2 == 0) {
+                    this.nodes1D[k++] = connectNodes[j] = new VerletNode(createVector(x2 * .85, y * .85, z2 * .85), 1.2, this.nodeCol);
+                } else {
+                    this.nodes1D[k++] = connectNodes[j] = new VerletNode(createVector(x2, y, z2), 1.2, this.nodeCol);
+                }
+                // this.nodes1D[k++] = connectNodes[j] = new VerletNode(createVector(x2, y, z2), 1.2, this.nodeCol);
 
                 phi += Math.PI * 2 / this.slices;
             }
@@ -83,32 +91,27 @@ class VerletToroid {
             }
         }
 
-        // create global cross supports
+        // create cross-supports and hairs
         let randNodeindex = 0;
-        for (let i = 0, k = 0; i < this.nodes1D.length; i++) {
+        for (let i = 0, k = 0, l = 0; i < this.nodes1D.length; i++) {
+            // cross-supports
             let val = Math.floor(Math.random() * (this.nodes1D.length - 1));
-            if (i % this.rigidity == 0 && i != val) {
+            if (i % this.rigidity === 0 && i !== val) {
                 this.crossSupportSticks[k++] = new VerletStick(this.nodes1D[i], this.nodes1D[val], 1, 0, this.stickCol);
             }
+            // hairs
+            // to do
         }
-
-        // // create tube cross supports
-        // for (let i = 0, k = 0; i < this.connects/2; i++) {
-        //     for (let j = 0; j < 1; j++) {
-        //         this.crossSupportSticks[k++] = new VerletStick(this.nodes1D[i], this.nodes1D[(i+1)], 1, 0, this.stickCol);
-        //     }
-        // }
-
 
     }
 
-    setColor(skinCol){
+    setColor(skinCol) {
         this.skinCol = skinCol;
     }
 
     nudge(index, offset) {
-        if(index===-1){
-            let ind = Math.floor(Math.random()*(this.nodes1D.length-1));
+        if (index === -1) {
+            let ind = Math.floor(Math.random() * (this.nodes1D.length - 1));
             this.nodes1D[ind].pos.add(offset);
         } else {
             this.nodes1D[index].pos.add(offset);
