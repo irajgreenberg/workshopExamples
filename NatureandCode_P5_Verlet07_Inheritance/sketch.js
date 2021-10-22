@@ -15,7 +15,7 @@ let verletHelix;
 function setup() {
     createCanvas(600, 600, WEBGL);
     bounds = createVector(400, 400, 400);
-    verletHelix = new VerletHelix(80, 30, 60, 3, .3, 3, 200, 2);
+    verletHelix = new VerletHelix(80, 30, 60, 10, .3, 3, 200, 3);
     verletHelix.setColor(color(165, 90, 10));
     verletHelix.nudge(-1, createVector(22.3, 22.5, 22.987));
 }
