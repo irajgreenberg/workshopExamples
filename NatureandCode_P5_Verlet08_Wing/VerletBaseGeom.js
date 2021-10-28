@@ -1,6 +1,6 @@
 class VerletBaseGeom {
 
-    constructor(sz, elasticity) {
+    constructor(sz = createVector(1, 1, 1), elasticity = .3) {
         this.sz = new sz;
         this.elasticity = elasticity;
         this.nodes = [];

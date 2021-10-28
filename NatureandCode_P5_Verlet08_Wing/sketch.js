@@ -5,7 +5,7 @@
 
 // Description:
 // Creating a Verlet organism
-// based on a Verlet Toroid
+// based on a Verlet Wing
 
 let bounds; // vector
 let verletBox;

@@ -55,8 +55,8 @@ class VerletToroid {
             y' = x*sin q + y*cos q
             z' = z
             */
-            let x = this.r1 + Math.cos(theta) * r2;
-            let y = Math.sin(theta) * r2;
+            let x = this.r1 + Math.cos(theta) * this.r2;
+            let y = Math.sin(theta) * this.r2;
             let z = 0;
 
             // create new connects arrays
